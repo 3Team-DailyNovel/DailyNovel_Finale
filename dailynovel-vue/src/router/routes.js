@@ -14,7 +14,9 @@ const routes =  [
     ]
   },
 
-  { path: '/member', component: memberLayout },
+  { path: '/member', component: memberLayout, children:[
+    {path: 'guestbook', component:memberGuestBookLayout} //test용입니다.
+  ]}, 
   { path: '/modal', component: memberModalLayout, children:[
     {path: 'guestbook', component:memberGuestBookLayout}
   ]}

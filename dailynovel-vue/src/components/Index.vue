@@ -1,3 +1,3 @@
 <template>
-  <span>dffafadf</span>
+  <span>인덱스</span>
 </template>

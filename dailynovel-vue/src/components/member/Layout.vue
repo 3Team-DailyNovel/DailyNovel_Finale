@@ -2,11 +2,12 @@
 import Modal from './modal/Layout.vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
+import Canvas from './Canvas.vue';
 </script>
 
 <template>
   <Header />
-  <canvas></canvas>
+  <Canvas></Canvas>
   <Modal />
   <Footer />
 </template>
