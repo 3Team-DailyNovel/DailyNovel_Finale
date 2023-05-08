@@ -47,7 +47,7 @@ function animationedHandler() {
     
 
     <!-- 모달창 -->
-        <div class="modal-bg"  :class="{'d-none':!isModalOpen}" @click.prevent="modalCloseHandler">
+        <div class="modal-bg"  :class="{'d-none':!isModalOpen}">
             <section class="modal-screen" :class="{'active': !closeEffect}" @animationend="animationedHandler" @click.stop>
                 <!-- <Modal  @closeModal="modalCloseHandler"/> -->
                 <Router-view @closeModal="modalCloseHandler"></Router-view>
