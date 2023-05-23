@@ -1,7 +1,7 @@
 
 <script setup>
 
-import { ref,onMounted, onUpdated,defineProps, defineEmits } from 'vue';
+import { ref,onMounted, onUpdated,defineProps } from 'vue';
 import { Quill, QuillEditor } from '@vueup/vue-quill';
 // import BlotFormatter from 'quill-blot-formatter'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
@@ -10,15 +10,11 @@ import ImageUploader from 'quill-image-uploader';
 import 'quill-image-uploader/dist/quill.imageUploader.min.css';
 
 const quill = ref(null);
-// console.log(quill.value);
+console.log(quill.value);
 const props = defineProps({
     'content' : '',
 
 });
-
-const emit = defineEmits(
-    ["quillOutput"]
-);
 
 //툴바 옵션들
 const toolbarOptions = 
@@ -34,19 +30,21 @@ const toolbarOptions =
 
 
 onMounted(() => {
-    // console.log("여기?");
+    console.log("여기?");
 
     quill.value = new Quill('.editor-quill');
-    // console.log(quill.value);
+    console.log(quill.value);
 
     let contents = quill.value.getContents();
-    
+    // quill.value.on('text-change', () =>{
+    //     console.log(quill.value.getContents());
+
+    // });
 
     let refValue = quill.value;
     refValue.on('text-change',editortrigger);
     // refValue.on('text-change',geoFindMe);
 });
-
 
 onUpdated(() => {
 
@@ -55,39 +53,20 @@ onUpdated(() => {
     // console.log(quill.value);
 });
 
-// quill.value.on('text-change', () =>{
-//     console.log(quill.value.getContents());
-
-// });
-let deltaJson = null;
-let convertDeltaJson = null;
 function editortrigger (delta, oldDelta, source) {
-    // console.log(quill.value.getContents().ops[0].insert);
-    console.log(quill.value.getContents().ops);
-    
+    if (source == 'api') {
+        console.log("An API call triggered this change.");
+    } else if (source == 'user') {
+        console.log("A user action triggered this change.");
+    }
+}
 
-    setTimeout(function(){
-        deltaJson = quill.value.getContents().ops;
-        convertDeltaJson = JSON.stringify(deltaJson);
 
-        emit("quillOutput", convertDeltaJson);
-
-    },3000);
-
-    // console.log(delta);
-
-    // ops[0].insert
-    
-    // if (source == 'api') {
-    //     console.log("An API call triggered this change.");
-    // } else if (source == 'user') {
-    //     console.log("A user action triggered this change.");
-    // }
-};
 
 </script>
 
 <template>
+
 
     <!-- <div
         class="editor-main-quill"> -->
@@ -103,6 +82,8 @@ function editortrigger (delta, oldDelta, source) {
             :toolbar="['bold', 'italic', 'underline', 'image']"
             />
             <!-- :modules="modules" -->
+
+
 
     
     <!-- </div> -->

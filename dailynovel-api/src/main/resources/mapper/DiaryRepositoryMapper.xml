@@ -76,7 +76,6 @@
             <if test="title != null">title = #{title},</if>
             <if test="content != null">content = #{content},</if>
             <if test="feeling != null">feeling = #{feeling},</if>
-            <if test="tag != null">tag = #{tag},</if>
             <if test="lat != null">lat = #{lat},</if>
             <if test="lat != null">lng = #{lng},</if>
         </set>

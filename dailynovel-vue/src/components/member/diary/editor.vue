@@ -2,9 +2,8 @@
 import quill from './quill.vue';
 import quill2 from './quill2.vue';
 import quillCopy from './quill copy.vue';
-import quill3 from './quill3.vue';
 
-import { ref,onMounted, onUpdated,  defineProps , defineEmits, watchEffect} from 'vue';
+import { ref,onMounted, onUpdated,  defineProps , defineEmits} from 'vue';
 import MapBox from './MapBox.vue';
 
 // "기분","화남","불편","평온","실망","불안","행복","슬픔","감동","신남"
@@ -15,9 +14,6 @@ const props = defineProps({
     'loadDiaryId' : '',
     'newestDiaryId' : ''
 });
-// 다이어리 불러오기 위한 값
-let defaultDiaryId = props.newestDiaryId;
-
 
 const emit = defineEmits(
     ["DoneAddDiary"]);
@@ -27,7 +23,6 @@ const defineRef = ref({
   'isInit' : '',
   // 'isShared' : 'false'
 });
-
 
 const isSharedref = ref();
 isSharedref.value = false
@@ -48,7 +43,8 @@ let ControllerAdd = props.isAdd;
 let myLocation = { lat: null, lng: null };
 
 onMounted(() => {
-  // console.log(props.newestDiaryId);
+  console.log(props.newestDiaryId);
+  geoFindMe();
 });
 
 
@@ -61,31 +57,15 @@ function newestPromise(diaryId){
   return new Promise(function (resolve){
     resolve(diaryId);
   })
-};
-
-//insert 다중반복 막기 위해서
+}
 let isOn = false;
 onUpdated(() => {
-
-
-
-      // load id 가 null 이 아니면
-  if(props.loadDiaryId != null){
-    defaultDiaryId = props.loadDiaryId;
-  }
-  else{ // load id 가 null 이면
-    defaultDiaryId = props.newestDiaryId;
-    initHander(defaultDiaryId);
-  }
-  console.log(defaultDiaryId);
-
-
-
+  initHander(props.newestDiaryId);
   //최초 데이터 받을 때
   if(!newest){
     // defineRef.value.isInit = false; //배경화면 끄기
     // defineRef.value.loading = true; //로딩창 소환
-    let promise = newestPromise(defaultDiaryId);
+    let promise = newestPromise(props.newestDiaryId);
     promise
     .then( result => loadDiary(result))
     .then( sucess => {
@@ -125,11 +105,9 @@ onUpdated(() => {
   // console.log("load: "+defineRef.value.loading ,"init: "+ defineRef.value.isInit);
 
   // console.log(previousLoad, props.loadDiaryId);
-
-  //클릭했을 때 불러오는 조건
-  if(previousLoad != defaultDiaryId){
-    loadDiary(defaultDiaryId);
-    previousLoad = defaultDiaryId;
+  if(previousLoad != props.loadDiaryId){
+    loadDiary(props.loadDiaryId);
+    previousLoad = props.loadDiaryId
   }
 
 })
@@ -223,8 +201,6 @@ function coor(coor) {
       fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&exclude=current&appid=fdbbc96af009ea8344414a270ad5386e&units=metric&lang=kr`, requestOptions)
       .then(response => response.json())
       .then(result => {
-          // console.log(result);
-
           weatherData.value.city = result.city.name;
           weatherData.value.weatherCode = result.list[1].weather[0].id;
 
@@ -335,7 +311,7 @@ const addDiary = function(isAdd){
     fetch("http://localhost:8080/diary", requestOptions)
       .then(response => response.text())
       .then(result => {
-        emit("DoneAddDiary", true);
+        emit("DoneAddDiary", true)
         diaryRef.value.regDate = getDate(new Date);
         // console.log(diaryObj.regDate);
         // console.log(diaryRef.value.regDate);
@@ -366,7 +342,7 @@ const loadDiary = function(diaryId){
       loadDiary(diaryId);
     });
   })
-};
+}
 
 const EditDiary = function(diaryId){
   return new Promise(function(resolve, reject){
@@ -375,15 +351,11 @@ const EditDiary = function(diaryId){
     myHeaders.append("Content-Type", "application/json");
 
     //ref 기본값 담기
-    // objRef(diaryId,1,null,"당신마음입력"
-    // ,null,"기분",100,"태그"
-    // ,null,38,128);
-    // diaryObj = diaryRef.value;
-    diaryObj.id = diaryId;
-    diaryObj.regDate = null;
-    
-    console.log(diaryObj);
+    objRef(diaryId,1,null,"당신마음입력"
+    ,null,"기분",100,"태그"
+    ,null,38,128);
 
+    diaryObj = diaryRef.value;
     let raw = JSON.stringify(diaryObj);
 
     let requestOptions = {
@@ -395,13 +367,16 @@ const EditDiary = function(diaryId){
 
     fetch("http://localhost:8080/diary", requestOptions)
       .then(response => response.text())
-      .then(result => loadDiary(diaryId))
+      .then(result => console.log(result))
       .catch(error => console.log('error', error));
+
+
+
 
     resolve();
   })
 
-};
+}
 
 
 const toggleClickHandler = (e) =>{
@@ -411,69 +386,18 @@ const toggleClickHandler = (e) =>{
 
 // let previousValueFeeling = diaryRef.value.feeling;
 // let previousValueTag = diaryRef.value.tag;
-let tagIsChange = false;
-let feelingIsChange = false;
+const feelingDropdownHandler = (e) =>{
 
-const DropdownHandler = (e) =>{
+  console.log(e.target);
+  console.log(e.target.className == "feel");
 
-  // console.log(e.target);
-  // console.log(e.target.className == "feel");
-
-  if(e.target.className == "feel"){
-    feelingIsChange = true;
+  if(e.target.className == "feel")
     diaryRef.value.feeling = e.target.innerText;
-  }
-  else if(e.target.className == "tag"){
-    tagIsChange = true;
+  else if(e.target.className == "tag")
     diaryRef.value.tag = e.target.innerText;
-  }
-};
-
-//헤더 부분 워치
-const DropDownWatchEffect = watchEffect(() => {
-  diaryRef.value.tag;
-  diaryRef.value.feeling;
-
-  if(tagIsChange == true){
-    console.log("이제 잘 됨");
-    tagIsChange = (!tagIsChange);
-    diaryObj = diaryRef.value;
-    EditDiary(defaultDiaryId);
-  }
-  else if(feelingIsChange == true){
-    console.log("이제 잘 됨");
-    feelingIsChange = (!feelingIsChange);
-    diaryObj = diaryRef.value;
-    EditDiary(defaultDiaryId);
-  }
-  
-  });
-
-
-  const editHandler = (e) => {
-    console.log(e.target.innerText);
-    // console.log( diaryRef.value.title);
-    console.log("블러블러");
-
-    diaryObj = diaryRef.value;
-    diaryObj.title = e.target.innerText;
-    EditDiary(defaultDiaryId);
-
-  };
-
-
-  // const textWatchEffect = watchEffect(() => {
-  //   diaryRef.value.tag;
-
-
-
-  // });
-
-let quillOutputValue = function() {
-
-  console.log("quillOutput");
 
 };
+
 
 </script>
 
@@ -496,12 +420,11 @@ let quillOutputValue = function() {
       <div class="editor-attribue">{{diaryRef.weather}}</div>
       <!-- <div class="editor-attribue">{{'#'+diaryRef.tag}}</div> -->
       <div class="editor-attribue dropdown">
-        <button 
-          class="dropbtn">{{'#'+diaryRef.tag}}</button>
-        <!-- :checkTag ="diaryTag" -->
+        <button class="dropbtn">{{'#'+diaryRef.tag}}</button>
         <div 
-          @click="DropdownHandler"          
-          class="dropdown-content dropdown-feeling-content">
+          :checkTag ="diaryTag"
+          @click="feelingDropdownHandler"          
+          class="dropdown-content">
 
           <div class="tag" href="#">자유</div>
           <div class="tag" href="#">여행</div>
@@ -513,9 +436,9 @@ let quillOutputValue = function() {
       <!-- <div class="editor-attribue">{{diaryRef.feeling}}</div> -->
       <div class="editor-attribue dropdown">
         <button class="dropbtn">{{diaryRef.feeling}}</button>
-        <!-- :checkTag ="diaryFeel" -->
         <div 
-          @click="DropdownHandler"          
+          :checkTag ="diaryFeel"
+          @click="feelingDropdownHandler"          
           class="dropdown-content">
 
           <div class="feel" href="#">화남</div>
@@ -536,7 +459,7 @@ let quillOutputValue = function() {
     <div class="editor-title">
         <header contenteditable="true"
                 class="editor-title-content editor-header"
-                @blur="editHandler"
+                @click="editHandler"
                 >
           <!-- {{titleDate+'의 일기'}} -->
           {{ diaryRef.title }}
@@ -564,17 +487,14 @@ let quillOutputValue = function() {
     <div class="editor-main-quill">
       <main
       class="editor-main"
-      @blur="editHandlerContent"
+      @click="editHandler"
       >
         <!-- <quill2/> -->
-        <!-- <quill
+        <quill
           class="editor-quill"
           :content = "diaryRef.content"
-          @quillOutput = "quillOutputValue"
-        /> -->
+        />
           <!-- <quillCopy/> -->
-
-          <quill3 />
 
       </main>
 
@@ -991,10 +911,6 @@ let quillOutputValue = function() {
   left: -3%;
 
   overflow-y: scroll;
-}
-
-.dropdown-feeling-content{
-  height: 120px;
 }
 
 .dropdown-content {
