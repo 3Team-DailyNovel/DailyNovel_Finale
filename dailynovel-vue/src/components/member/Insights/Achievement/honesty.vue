@@ -149,14 +149,14 @@ async function Hload() {
     counts.push(data[key]);
   }
 
-  honesty0Data.value = counts[0];
-  honesty2Data.value = counts[1];
-  honesty4Data.value = counts[2];
-  honesty6Data.value = counts[3];
-  honesty8Data.value = counts[4];
+  honesty0Data.value = counts[0] || 0;
+  honesty2Data.value = counts[1] || 0;
+  honesty4Data.value = counts[2] || 0;
+  honesty6Data.value = counts[3] || 0;
+  honesty8Data.value = counts[4] || 0;
 
-  honesty2Total.value = honesty0Data.value + honesty2Data.value;
-  honesty6Total.value = honesty6Data.value + honesty8Data.value
+  honesty2Total.value = (Number(honesty0Data.value) || 0) + (Number(honesty2Data.value) || 0);
+  honesty6Total.value = (Number(honesty6Data.value) || 0) + (Number(honesty8Data.value) || 0);
 
 }
 
